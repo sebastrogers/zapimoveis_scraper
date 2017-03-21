@@ -1,12 +1,22 @@
 import scrapy
+import json
 from scrapy import Selector
 from scrapy_splash import SplashRequest
+from zapimoveis.items import ZapItem
 
 
 class ZapSpider(scrapy.Spider):
-    name = "zap"
 
-    def __init__(self):
+    name = "zap"
+    allowed_domains = ['www.zapimoveis.com.br']
+
+    def __init__(self, place=None, max_pages=None, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.max_pages = None if not max_pages else int(max_pages)
+        self.start_urls = [
+            'https://www.zapimoveis.com.br/venda/imoveis/{0}'.format(
+                'pe+recife' if not place else place),
+        ]
         self.lua_script = """
             function main(splash)
               assert(splash:go(splash.args.url))
@@ -16,25 +26,22 @@ class ZapSpider(scrapy.Spider):
             end
         """
 
-    def start_requests(self):
-        urls = [
-                'https://www.zapimoveis.com.br/venda/imoveis/pe+recife/',
-        ]
-
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
-        self.file_count = 1
+        pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
+        total_pages = int(response.xpath(pattern).extract()[0])
 
-        sel = Selector(response=response)
-        # <input type="hidden" id="quantidadeTotalPaginas" data-value="361" />
-        pags = int(sel.xpath('//input[@id="quantidadeTotalPaginas"]/@data-value').extract()[0])
+        if self.max_pages:
+            pages = min(self.max_pages, total_pages)
+        else:
+            pages = total_pages
 
-        self.parse_content(response)
+        self.logger.info('Crawling {0} of {1} pages...'.
+                format(pages, total_pages))
 
-        # for pag in range(2, pags + 1):
-        for pag in range(2, 4):
+        yield from self.parse_content(response)
+
+        for pag in range(2, pages + 1):
             yield SplashRequest(response.url, 
                     self.parse_content,
                     endpoint='execute',
@@ -43,10 +50,36 @@ class ZapSpider(scrapy.Spider):
                     )
 
     def parse_content(self, response):
-        filename = 'files/response{0}.html'.format(self.file_count)
+        pattern = '/html/body/script[@type="application/ld+json"]/text()'
+        js = json.loads(response.xpath(pattern).extract()[0])
 
-        with open(filename, 'wb') as f:
-            f.write(response.body)
-        self.log('Saved file {0}'.format(filename))
+        for jsitem in js[2:]:
+            item = ZapItem()
+            item['action'] = jsitem['@type']
+            item['price'] = jsitem['price']
+            item['currency'] = jsitem['priceSpecification']['priceCurrency']
 
-        self.file_count += 1
+            jsobject = jsitem['object']
+            item['id'] = jsobject['@id']
+            item['type'] = jsobject['@type']
+
+            jsaddress = jsobject['address']
+            item['country'] = jsaddress['addressCountry']['name']
+            item['city'] = jsaddress['addressLocality']
+            item['state'] = jsaddress['addressRegion']
+            item['postal_code'] = jsaddress['postalCode']
+            item['street'] = jsaddress['streetAddress']
+
+            item['description'] = jsobject['description']
+            item['latitude'] = jsobject['geo']['latitude']
+            item['longitude'] = jsobject['geo']['longitude']
+            item['name'] = jsobject['name']
+            item['url'] = jsobject['url']
+
+
+            jsseller = jsitem['seller']
+            item['seller_type'] = jsseller['@type']
+            item['seller_name'] = jsseller['name']
+            item['seller_url'] = jsseller['url']
+
+            yield item
