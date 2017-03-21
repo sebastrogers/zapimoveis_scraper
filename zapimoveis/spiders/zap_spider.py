@@ -25,31 +25,28 @@ class ZapSpider(scrapy.Spider):
             yield scrapy.Request(url=url, callback=self.parse)
 
     def parse(self, response):
+        self.file_count = 1
 
         sel = Selector(response=response)
         # <input type="hidden" id="quantidadeTotalPaginas" data-value="361" />
         pags = int(sel.xpath('//input[@id="quantidadeTotalPaginas"]/@data-value').extract()[0])
 
-        self.splash_count = 1
-        filename = 'files/response.html'
-        with open(filename, 'wb') as f:
-            f.write(response.body)
-        self.log('Saved file %s' % filename)
-
+        self.parse_content(response)
 
         # for pag in range(2, pags + 1):
-        for pag in range(2, 6):
+        for pag in range(2, 4):
             yield SplashRequest(response.url, 
-                    self.parse_splash,
+                    self.parse_content,
                     endpoint='execute',
-                    args={'lua_source': self.lua_script.format(pag=pag, wait=2) },
+                    args={'lua_source': self.lua_script.format(pag=pag, wait=3)},
                     dont_filter=True
                     )
 
-    def parse_splash(self, response):
-        filename = 'files/response_splash{0}.html'.format(self.splash_count)
+    def parse_content(self, response):
+        filename = 'files/response{0}.html'.format(self.file_count)
+
         with open(filename, 'wb') as f:
             f.write(response.body)
-        self.log('Saved file %s' % filename)
+        self.log('Saved file {0}'.format(filename))
 
-        self.splash_count += 1
+        self.file_count += 1
