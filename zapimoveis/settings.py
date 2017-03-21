@@ -8,6 +8,7 @@
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #     http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 #     http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
+from fake_useragent import UserAgent
 
 BOT_NAME = 'zapimoveis'
 
@@ -16,7 +17,8 @@ NEWSPIDER_MODULE = 'zapimoveis.spiders'
 
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'zapimoveis (+http://www.yourdomain.com)'
+# USER_AGENT = 'zapimoveis (+http://www.yourdomain.com)'
+USER_AGENT = UserAgent()['chrome']
 
 # Obey robots.txt rules
 ROBOTSTXT_OBEY = False
@@ -46,15 +48,16 @@ ROBOTSTXT_OBEY = False
 
 # Enable or disable spider middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
-#SPIDER_MIDDLEWARES = {
-#    'zapimoveis.middlewares.ZapimoveisSpiderMiddleware': 543,
-#}
+SPIDER_MIDDLEWARES = {
+    'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+}
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
 DOWNLOADER_MIDDLEWARES = {
-    'scrapy.downloadermiddlewares.useragent.UserAgentMiddleware': None,
-    'scrapy_fake_useragent.middleware.RandomUserAgentMiddleware': 400,
+    'scrapy_splash.SplashCookiesMiddleware': 723,
+    'scrapy_splash.SplashMiddleware': 725,
+    'scrapy.downloadermiddlewares.httpcompression.HttpCompressionMiddleware': 810,
 }
 
 # Enable or disable extensions
@@ -89,3 +92,8 @@ DOWNLOADER_MIDDLEWARES = {
 #HTTPCACHE_DIR = 'httpcache'
 #HTTPCACHE_IGNORE_HTTP_CODES = []
 #HTTPCACHE_STORAGE = 'scrapy.extensions.httpcache.FilesystemCacheStorage'
+HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
+
+# Splash
+SPLASH_URL = 'http://localhost:8050'
+DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
