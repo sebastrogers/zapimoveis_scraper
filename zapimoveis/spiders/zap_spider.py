@@ -23,10 +23,12 @@ class ZapSpider(scrapy.Spider):
 
         if not os.path.exists('files/'):
             os.mkdir('files')
+
         self.start_urls = [
             'https://www.zapimoveis.com.br/venda/imoveis/{0}'.format(
-                'pe+recife' if not place else place),
+                    place or 'pe+recife'),
         ]
+
         self.lua_script = """
             function main(splash)
               assert(splash:go(splash.args.url))
@@ -84,7 +86,7 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse_detail(self, response):
-        with open('files/details_{0:04d}.html'.\
+        with open('files/details_{0:04d}.html'.
                 format(self.details_count), 'wb') as f:
             f.write(response.body)
 
@@ -106,8 +108,8 @@ class ZapSpider(scrapy.Spider):
 
         item['bedrooms'] = lis.re_first('(?i)<li>\s*(\d+).*quarto')
         item['suites'] = lis.re_first('(?i)<li>\s*(\d+).*su[ií]te') # buscar tradução
-        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+\.?\d*).*[aá]rea\s+[úu]til')
-        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+\.?\d*).*[aá]rea\s+total')
+        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+).*[aá]rea\s+[úu]til')
+        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+).*[aá]rea\s+total')
         item['vacancies'] = lis.re_first('(?i)<li>\s*(\d+).*vaga')
 
     def parse_json_detail(self, response, item):

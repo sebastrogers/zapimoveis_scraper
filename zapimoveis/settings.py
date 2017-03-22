@@ -68,9 +68,10 @@ DOWNLOADER_MIDDLEWARES = {
 
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
-#ITEM_PIPELINES = {
+ITEM_PIPELINES = {
 #    'zapimoveis.pipelines.ZapimoveisPipeline': 300,
-#}
+   'zapimoveis.pipelines.SqlAlchemyPipeline': 400,
+}
 
 # Enable and configure the AutoThrottle extension (disabled by default)
 # See http://doc.scrapy.org/en/latest/topics/autothrottle.html
@@ -97,3 +98,9 @@ HTTPCACHE_STORAGE = 'scrapy_splash.SplashAwareFSCacheStorage'
 # Splash
 SPLASH_URL = 'http://localhost:8050'
 DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
+
+# SqlAlchemy
+SQLALCHEMY_CONFIG = {
+        'url': 'sqlite:///zap.db' ,
+        'echo': True
+}

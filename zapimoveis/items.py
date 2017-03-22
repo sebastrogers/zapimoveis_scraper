@@ -5,39 +5,39 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/items.html
 
-import scrapy
+from scrapy import Item, Field
 
 
-class ZapItem(scrapy.Item):
+class ZapItem(Item):
     # Extraídos do Json
-    action = scrapy.Field()
-    id = scrapy.Field()
-    type = scrapy.Field()
-    country = scrapy.Field()
-    city = scrapy.Field()
-    state = scrapy.Field()
-    postal_code = scrapy.Field()
-    street = scrapy.Field()
-    description = scrapy.Field()
-    latitude = scrapy.Field()
-    longitude = scrapy.Field()
-    name = scrapy.Field()
-    url = scrapy.Field()
-    price = scrapy.Field()
-    currency = scrapy.Field()
-    seller_type = scrapy.Field()
-    seller_name = scrapy.Field()
-    seller_url = scrapy.Field()
-    client_code = scrapy.Field()
-    transaction = scrapy.Field()
-    property_subtype = scrapy.Field()
+    id = Field()
+    name = Field()
+    action = Field()
+    type = Field()
+    country = Field()
+    city = Field()
+    state = Field()
+    postal_code = Field()
+    street = Field()
+    description = Field()
+    latitude = Field()
+    longitude = Field()
+    url = Field()
+    price = Field()
+    currency = Field()
+    seller_type = Field()
+    seller_name = Field()
+    seller_url = Field()
+    client_code = Field()
+    transaction = Field()
+    property_subtype = Field()
 
     # Extraídos do Html
-    bedrooms = scrapy.Field()
-    suites = scrapy.Field() # buscar tradução
-    useful_area_m2 = scrapy.Field()
-    total_area_m2 = scrapy.Field()
-    vacancies = scrapy.Field()
+    bedrooms = Field()
+    suites = Field() # buscar tradução
+    useful_area_m2 = Field()
+    total_area_m2 = Field()
+    vacancies = Field()
 
     def __repr__(self):
         return self['name']
