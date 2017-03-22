@@ -36,6 +36,7 @@ import scrapy
 #         'url': 'https://www.zapimoveis.com.br/imobiliaria/maria-eugenia/#{"codcliente":"2403365","transacao":"venda","subtipoimovel":"imoveis"}'}}
 
 class ZapItem(scrapy.Item):
+    # Extraídos do Json
     action = scrapy.Field()
     id = scrapy.Field()
     type = scrapy.Field()
@@ -54,3 +55,9 @@ class ZapItem(scrapy.Item):
     seller_type = scrapy.Field()
     seller_name = scrapy.Field()
     seller_url = scrapy.Field()
+    # Extraídos do Html
+    bedrooms = scrapy.Field()
+    suites = scrapy.Field() # buscar tradução
+    useful_area_m2 = scrapy.Field()
+    total_area_m2 = scrapy.Field()
+    vacancies = scrapy.Field()
