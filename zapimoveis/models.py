@@ -5,10 +5,9 @@ Base = declarative_base()
 
 
 class Realty(Base):
-    __tablename__ = 'realty'
+    __tablename__ = 'realties'
 
     id = Column(Integer, primary_key=True)
-    zap_id = Column(Integer)
     name = Column(String)
     action = Column(String)
     type = Column(String)
@@ -37,10 +36,7 @@ class Realty(Base):
 
     @classmethod
     def from_item(cls, item):
-        return cls(
-                zap_id = item['id'],
-                name = item['name']
-                )
+        return cls(**{i:item[i] for i in item})
 
     def __repr__(self):
         return "<Realty(id={0}, name='{0}')>".format(self.id, self.name)
