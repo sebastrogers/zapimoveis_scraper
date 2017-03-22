@@ -37,4 +37,4 @@ Then start the crawler:
 ```
 scrapy crawl zap [-a max_pages=n]
 ```
-> You can pass `max_pages` as an argument to limit the number of listing pages the scraper will search for.
+> You can pass a number through `max_pages` as an argument to limit the number of listing pages the scraper will search for.
