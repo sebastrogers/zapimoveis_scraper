@@ -55,6 +55,10 @@ class ZapItem(scrapy.Item):
     seller_type = scrapy.Field()
     seller_name = scrapy.Field()
     seller_url = scrapy.Field()
+    client_code = scrapy.Field()
+    transaction = scrapy.Field()
+    property_subtype = scrapy.Field()
+
     # Extraídos do Html
     bedrooms = scrapy.Field()
     suites = scrapy.Field() # buscar tradução

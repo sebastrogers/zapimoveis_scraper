@@ -1,10 +1,11 @@
 import scrapy
 import json
+import os
+import re
 from scrapy import Request
 from scrapy import Selector
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
-import os
 
 
 class ZapSpider(scrapy.Spider):
@@ -91,29 +92,47 @@ class ZapSpider(scrapy.Spider):
         pattern = '/html/body/script[@type="application/ld+json"]/text()'
         jsitem = json.loads(response.xpath(pattern).extract_first())[1]
 
-        item['action'] = jsitem['@type']
-        item['price'] = jsitem['price']
-        item['currency'] = jsitem['priceSpecification']['priceCurrency']
+        item['action'] = jsitem.setdefault('@type')
+        item['price'] = jsitem.setdefault('price')
+        if 'priceSpecification' in jsitem:
+            item['currency'] = jsitem['priceSpecification'].\
+                    setdefault('priceCurrency')
 
-        jsobject = jsitem['object']
-        item['id'] = jsobject['@id']
-        item['type'] = jsobject['@type']
+        if 'object' in jsitem:
+            jsobject = jsitem['object']
 
-        jsaddress = jsobject['address']
-        item['country'] = jsaddress['addressCountry']['name']
-        item['city'] = jsaddress['addressLocality']
-        item['state'] = jsaddress['addressRegion']
-        item['postal_code'] = jsaddress['postalCode']
-        item['street'] = jsaddress['streetAddress']
+            item['type'] = jsobject.setdefault('@type')
+            item['description'] = jsobject.setdefault('description')
+            item['name'] = jsobject.setdefault('name')
+            item['url'] = jsobject.setdefault('url')
+            if '@id' in jsobject:
+                item['id'] = re.search('\d+', jsobject['@id']).group()
+            if 'address' in jsobject:
+                jsaddress = jsobject['address']
+                if 'addressCountry' in jsaddress:
+                    item['country'] = jsaddress['addressCountry'].\
+                            setdefault('name')
+                item['city'] = jsaddress.setdefault('addressLocality')
+                item['state'] = jsaddress.setdefault('addressRegion')
+                item['postal_code'] = jsaddress.setdefault('postalCode')
+                item['street'] = jsaddress.setdefault('streetAddress')
+            if 'geo' in jsobject:
+                item['latitude'] = jsobject['geo'].setdefault('latitude')
+                item['longitude'] = jsobject['geo'].setdefault('longitude')
 
-        item['description'] = jsobject['description']
-        item['latitude'] = jsobject['geo']['latitude']
-        item['longitude'] = jsobject['geo']['longitude']
-        item['name'] = jsobject['name']
-        item['url'] = jsobject['url']
 
+        if 'seller' in jsitem:
+            jsseller = jsitem['seller']
 
-        jsseller = jsitem['seller']
-        item['seller_type'] = jsseller['@type']
-        item['seller_name'] = jsseller['name']
-        item['seller_url'] = jsseller['url']
+            item['seller_type'] = jsseller.setdefault('@type')
+            item['seller_name'] = jsseller.setdefault('name')
+            if 'url' in jsseller:
+                url, *c_params = jsseller['url'].split('#',1)
+                item['seller_url'] = url
+                c_params = c_params[0]
+                if c_params:
+                    c_params = json.loads(c_params)
+                    item['client_code'] = c_params.setdefault('codcliente')
+                    item['transaction'] = c_params.setdefault('transacao')
+                    item['property_subtype'] = c_params.setdefault('subtipoimovel')
+
