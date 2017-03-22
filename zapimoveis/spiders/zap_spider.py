@@ -80,7 +80,7 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse_html_detail(self, response, item):
-        lis = response.css('div.informacoes-imovel li')
+        lis = response.css('div.informacoes-imovel ul > li')
 
         item['bedrooms'] = lis.re_first('(?i)<li>\s*(\d+).*quarto')
         item['suites'] = lis.re_first('(?i)<li>\s*(\d+).*su[ií]te') # buscar tradução
