@@ -31,7 +31,8 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        self.file_count = 1
+        self.details_count = 1
+        self.listing_count = 1
         if not os.path.exists('files/'):
             os.mkdir('files')
 
@@ -62,15 +63,21 @@ class ZapSpider(scrapy.Spider):
 
         with open('files/links.txt', 'a') as f:
             f.write('\n'.join(links))
+        with open('files/listing_{0:03d}.html'.
+                format(self.listing_count), 'wb') as f:
+            f.write(response.body)
+            self.listing_count += 1
 
         for link in links:
-            yield Request(link, self.parse_detail)
+            # O split remove a querystring
+            yield Request(link.split('?',1)[0], self.parse_detail)
 
 
     def parse_detail(self, response):
-        with open('files/response_{0:03d}.html'.format(self.file_count), 'wb') as f:
+        with open('files/details_{0:04d}.html'.\
+                format(self.details_count), 'wb') as f:
             f.write(response.body)
-            self.file_count += 1
+            self.details_count += 1
 
         item = ZapItem()
         self.parse_json_detail(response, item)
