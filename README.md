@@ -8,18 +8,25 @@ You will need to have docker installed in your machine in order to pull and run 
 |-|
 |[Python 3.5+](https://www.python.org/)|
 |[Docker](https://www.docker.com/) |
+|[PostgreSQL](https://www.postgresql.org/) |
 
-### Pull Splash image from docker
+### 1. Pull Splash image from docker
 After you have docker installed, you just need to run:
 
 ```sh
 $ docker pull scrapinghub/splash
 ```
 
-### Install Python requirements
+### 2. Install Python requirements
 Inside the project folder, install python requirements using pip:
 ```sh
 $ pip install -r requirements.txt
+```
+
+### 3. Create the database
+After installing PostgreSQL, create the database:
+```sh
+$ createdb zapimoveis
 ```
 
 ## Usage
