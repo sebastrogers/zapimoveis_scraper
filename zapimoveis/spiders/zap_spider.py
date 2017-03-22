@@ -33,6 +33,7 @@ class ZapSpider(scrapy.Spider):
     def parse(self, response):
         self.details_count = 1
         self.listing_count = 1
+        self.total_details = 0
         if not os.path.exists('files/'):
             os.mkdir('files')
 
@@ -40,16 +41,16 @@ class ZapSpider(scrapy.Spider):
         total_pages = int(response.xpath(pattern).extract_first())
 
         if self.max_pages:
-            pages = min(self.max_pages, total_pages)
+            self.pages = min(self.max_pages, total_pages)
         else:
-            pages = total_pages
+            self.pages = total_pages
 
-        self.logger.info('Crawling {0} of {1} pages...'.
-                format(pages, total_pages))
+        self.log('Crawling {0} of {1} pages...'.
+                format(self.pages, total_pages))
 
         yield from self.parse_listing(response)
 
-        for pag in range(2, pages + 1):
+        for pag in range(2, self.pages + 1):
             yield SplashRequest(response.url, 
                     self.parse_listing,
                     endpoint='execute',
@@ -60,28 +61,38 @@ class ZapSpider(scrapy.Spider):
 
     def parse_listing(self, response):
         links = response.xpath('//a[@class="detalhes"]/@href').extract()
+        self.total_details += len(links)
 
         with open('files/links.txt', 'a') as f:
             f.write('\n'.join(links))
         with open('files/listing_{0:03d}.html'.
                 format(self.listing_count), 'wb') as f:
             f.write(response.body)
-            self.listing_count += 1
 
         for link in links:
             # O split remove a querystring
             yield Request(link.split('?',1)[0], self.parse_detail)
+
+        self.log("**** Listings: {0}/{1}\t {2:0.0%} ***".
+                format(self.listing_count, self.pages,
+                       self.listing_count/self.pages))
+        self.listing_count += 1
 
 
     def parse_detail(self, response):
         with open('files/details_{0:04d}.html'.\
                 format(self.details_count), 'wb') as f:
             f.write(response.body)
-            self.details_count += 1
 
         item = ZapItem()
         self.parse_json_detail(response, item)
         self.parse_html_detail(response, item)
+
+        # A conta aqui pode não bater, pois links repetidos são filtrados
+        self.log("**** Scraped: {0}/{1}\t {2:0.0%} ***".
+                format(self.details_count, self.total_details,
+                       self.details_count/self.total_details))
+        self.details_count += 1
 
         return item
 
