@@ -16,9 +16,9 @@ class ZapimoveisPipeline(object):
 
 class SqlAlchemyPipeline(object):
     def __init__(self, config):
-        engine = engine_from_config(config, prefix='')
-        Base.metadata.create_all(engine)
-        Session.configure(bind=engine)
+        self.engine = engine_from_config(config, prefix='')
+        Base.metadata.create_all(self.engine)
+        Session.configure(bind=self.engine)
 
     @classmethod
     def from_crawler(cls, crawler):
@@ -28,7 +28,7 @@ class SqlAlchemyPipeline(object):
     #     self.session = Session(bind=self.engine)
 
     def close_spider(self, spider):
-        engine.dispose()
+        self.engine.dispose()
 
     def process_item(self, item, spider):
         session = Session()

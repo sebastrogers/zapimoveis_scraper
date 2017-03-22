@@ -103,5 +103,5 @@ DUPEFILTER_CLASS = 'scrapy_splash.SplashAwareDupeFilter'
 SQLALCHEMY_CONFIG = {
         'url': 'postgresql://localhost/zapimoveis',
         # 'url': 'sqlite:///zap.db' ,
-        'echo': True
+        # 'echo': True
 }

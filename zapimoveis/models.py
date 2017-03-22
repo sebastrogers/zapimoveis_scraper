@@ -1,5 +1,6 @@
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import Column, Integer, String, Float
+from sqlalchemy import Column, Integer, String, Float, DateTime
+from datetime import datetime
 
 Base = declarative_base()
 
@@ -33,10 +34,13 @@ class Realty(Base):
     useful_area_m2 = Column(Integer)
     total_area_m2 = Column(Integer)
     vacancies = Column(String)
+    update_time = Column(DateTime)
 
     @classmethod
     def from_item(cls, item):
-        return cls(**{i:item[i] for i in item})
+        realty = cls(**dict(item))
+        realty.update_time = datetime.now()
+        return realty
 
     def __repr__(self):
-        return "<Realty(id={0}, name='{0}')>".format(self.id, self.name)
+        return "<Realty(id={0}, name='{1}')>".format(self.id, self.name)

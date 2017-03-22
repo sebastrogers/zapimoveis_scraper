@@ -40,4 +40,4 @@ class ZapItem(Item):
     vacancies = Field()
 
     def __repr__(self):
-        return "<ZapItem(id={0}, name='{0}')>".format(self['id'], self['name'])
+        return "<ZapItem(id={0}, name='{1}')>".format(self['id'], self['name'])
