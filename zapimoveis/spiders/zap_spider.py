@@ -13,9 +13,16 @@ class ZapSpider(scrapy.Spider):
     name = "zap"
     allowed_domains = ['www.zapimoveis.com.br']
 
-    def __init__(self, place=None, max_pages=None, *args, **kwargs):
+    def __init__(self, place=None, listing_pages=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.max_pages = None if not max_pages else int(max_pages)
+        self.listing_pages = None if not listing_pages else int(listing_pages)
+        self.details_count = 0
+        self.listing_count = 0
+        self.total_details = 0
+        self.total_listings = 0
+
+        if not os.path.exists('files/'):
+            os.mkdir('files')
         self.start_urls = [
             'https://www.zapimoveis.com.br/venda/imoveis/{0}'.format(
                 'pe+recife' if not place else place),
@@ -31,30 +38,27 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse(self, response):
-        self.details_count = 1
-        self.listing_count = 1
-        self.total_details = 0
-        if not os.path.exists('files/'):
-            os.mkdir('files')
-
         pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
         total_pages = int(response.xpath(pattern).extract_first())
 
-        if self.max_pages:
-            self.pages = min(self.max_pages, total_pages)
+        if self.listing_pages:
+            pages = min(self.listing_pages, total_pages)
         else:
-            self.pages = total_pages
+            pages = total_pages
 
-        self.log('Crawling {0} of {1} pages...'.
-                format(self.pages, total_pages))
+        self.total_listings += pages
+
+        self.log('Crawling {0} of {1} listing pages...'.
+                format(pages, total_pages))
 
         yield from self.parse_listing(response)
 
-        for pag in range(2, self.pages + 1):
+        for pag in range(2, pages + 1):
             yield SplashRequest(response.url, 
                     self.parse_listing,
                     endpoint='execute',
-                    args={'lua_source': self.lua_script.format(pag=pag, wait=5)},
+                    args={'lua_source': self.lua_script.
+                                        format(pag=pag, wait=5)},
                     dont_filter=True
                     )
 
@@ -73,10 +77,10 @@ class ZapSpider(scrapy.Spider):
             # O split remove a querystring
             yield Request(link.split('?',1)[0], self.parse_detail)
 
-        self.log("**** Listings: {0}/{1}\t {2:0.0%} ***".
-                format(self.listing_count, self.pages,
-                       self.listing_count/self.pages))
         self.listing_count += 1
+        self.log("**** Listings: {0}/{1}\t {2:0.0%} ***".
+                format(self.listing_count, self.total_listings,
+                       self.listing_count/self.total_listings))
 
 
     def parse_detail(self, response):
@@ -89,10 +93,10 @@ class ZapSpider(scrapy.Spider):
         self.parse_html_detail(response, item)
 
         # A conta aqui pode não bater, pois links repetidos são filtrados
+        self.details_count += 1
         self.log("**** Scraped: {0}/{1}\t {2:0.0%} ***".
                 format(self.details_count, self.total_details,
                        self.details_count/self.total_details))
-        self.details_count += 1
 
         return item
 
