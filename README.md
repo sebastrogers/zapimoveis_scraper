@@ -3,7 +3,8 @@ A scraper that gathers data from [Zap Imóveis](http://zapimoveis.com.br) websit
 
 ## Installation
 You will need to have docker installed in your machine in order to pull and run [Splash](http://splash.readthedocs.io/).  
-|Requirements|
+
+|Major requirements|
 |-|
 |[Python 3.5+](https://www.python.org/)|
 |[Docker](https://www.docker.com/) |
@@ -33,6 +34,7 @@ Then run the crawler:
 ```
 $ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] [-a listing_pages=n]
 ```
+
 Notes:
 * You can pass a number through `listing_pages` as an argument to limit the number of listing pages the scraper will search for. The default is to scrap all.
 * You can also pass a place you want to search through the `place` argument, following the Zapimoveis URL format. Default: `pe+recife`.
