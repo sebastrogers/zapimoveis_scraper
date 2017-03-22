@@ -19,7 +19,7 @@ docker pull scrapinghub/splash
 ```
 
 ### Install python requirements
-Inside the project folder install using pip:
+Inside the project folder, install python requirements using pip:
 ```sh
 pip install -r requirements.txt
 ```
