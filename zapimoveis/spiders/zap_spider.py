@@ -26,7 +26,7 @@ class ZapSpider(scrapy.Spider):
 
         self.start_urls = [
             self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
-                place or 'pe+recife')),
+                place or 'pe+recife' if place != 'all' else '')),
         ]
 
         self.lua_script = """
@@ -67,7 +67,7 @@ class ZapSpider(scrapy.Spider):
                     self.parse_listing,
                     endpoint='execute',
                     args={'lua_source': self.lua_script.
-                                        format(pag=pag, wait=10)},
+                                        format(pag=pag, wait=7)},
                     dont_filter=True
                 )
 

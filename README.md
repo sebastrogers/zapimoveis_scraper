@@ -42,6 +42,23 @@ Then run the crawler:
 $ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] [-a listing_pages=n]
 ```
 
-Notes:
 * You can pass a number through `listing_pages` as an argument to limit the number of listing pages the scraper will search for. The default is to scrap all.
 * You can also pass a place you want to search through the `place` argument, following the Zapimoveis URL format. Default: `pe+recife`.
+
+### Examples
+* Default values (Recife-PE, all pages):
+  ```
+  $ scrapy crawl zap
+  ```
+* Olinda-PE, 4 pages
+  ```
+  $ scrapy crawl zap -a listing_pages=4 -a place=pe+olinda
+  ```
+* Rio de Janeiro-RJ - south zone
+  ```
+  $ scrapy crawl zap -a listing_pages=3 -a place=rj+rio-de-janeiro+zona-sul
+  ```
+* All places, 3 pages
+  ```
+  $ scrapy crawl zap -a listing_pages=3 -a place=all
+  ```
