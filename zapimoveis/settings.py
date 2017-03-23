@@ -50,6 +50,7 @@ ROBOTSTXT_OBEY = False
 # See http://scrapy.readthedocs.org/en/latest/topics/spider-middleware.html
 SPIDER_MIDDLEWARES = {
     'scrapy_splash.SplashDeduplicateArgsMiddleware': 100,
+    'zapimoveis.middlewares.SqlAlchemyMiddleware': 200,
 }
 
 # Enable or disable downloader middlewares
