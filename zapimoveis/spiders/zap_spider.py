@@ -106,8 +106,8 @@ class ZapSpider(scrapy.Spider):
 
         item['bedrooms'] = lis.re_first('(?i)<li>\s*(\d+).*quarto')
         item['suites'] = lis.re_first('(?i)<li>\s*(\d+).*su[ií]te') # buscar tradução
-        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+).*[aá]rea\s+[úu]til')
-        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+).*[aá]rea\s+total')
+        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+[úu]til').replace('.','')
+        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+total').replace('.','')
         item['vacancies'] = lis.re_first('(?i)<li>\s*(\d+).*vaga')
 
     def parse_json_detail(self, response, item):

@@ -8,6 +8,7 @@ Base = declarative_base()
 class Realty(Base):
     __tablename__ = 'realties'
 
+    # TODO [romeira]: apply type constraints {23/03/17 05:58}
     id = Column(Integer, primary_key=True)
     name = Column(String)
     action = Column(String)
