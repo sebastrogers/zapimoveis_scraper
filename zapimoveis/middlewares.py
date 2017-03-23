@@ -60,7 +60,7 @@ class SqlAlchemyMiddleware(object):
             session.close()
 
         filtered_count = len(res)
-        spider.log('**** Foram filtradas {0} páginas recentes.'.
+        spider.log('**** Filtered: {0} (recent scraped).'.
                 format(filtered_count))
         spider.total_details -= filtered_count
 

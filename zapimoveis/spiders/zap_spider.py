@@ -22,9 +22,6 @@ class ZapSpider(scrapy.Spider):
         self.total_details = 0
         self.total_listings = 0
 
-        if not os.path.exists('files/'):
-            os.mkdir('files')
-
         self.start_urls = [
             self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
                 place or 'pe+recife')),
@@ -76,12 +73,6 @@ class ZapSpider(scrapy.Spider):
         links = response.xpath('//a[@class="detalhes"]/@href').extract()
         self.total_details += len(links)
 
-        with open('files/links.txt', 'a') as f:
-            f.write('\n'.join(links))
-        with open('files/listing_{0:03d}.html'.
-                format(self.listing_count), 'wb') as f:
-            f.write(response.body)
-
         for link in links:
             yield Request(self.urlfmt(link), self.parse_detail)
 
@@ -92,10 +83,6 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse_detail(self, response):
-        with open('files/details_{0:04d}.html'.
-                format(self.details_count), 'wb') as f:
-            f.write(response.body)
-
         item = ZapItem()
         self.parse_json_detail(response, item)
         self.parse_html_detail(response, item)

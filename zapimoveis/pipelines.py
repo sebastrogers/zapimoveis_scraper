@@ -23,7 +23,7 @@ class SqlAlchemyPipeline(object):
         return cls(crawler.settings.get('SQLALCHEMY_CONFIG'))
 
     def close_spider(self, spider):
-        spider.log("**** Total: {0} atualizações.".
+        spider.log("**** Total: {0} updates.".
                 format(self.updated_count))
         self.engine.dispose()
 
@@ -32,7 +32,7 @@ class SqlAlchemyPipeline(object):
         session = Session(bind=self.engine)
         try:
             session.merge(realty)
-            spider.log("**** Inserindo/atualizando: {0}...".format(realty))
+            spider.log("**** Insert/update: {0}...".format(realty))
             session.commit()
             self.updated_count += 1
         except:
