@@ -16,19 +16,25 @@ class ZapimoveisPipeline(object):
 class SqlAlchemyPipeline(object):
     def __init__(self, config):
         self.engine = engine_from_config(config, prefix='')
+        self.updated_count = 0
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(crawler.settings.get('SQLALCHEMY_CONFIG'))
 
     def close_spider(self, spider):
+        spider.log("**** Total: {0} atualizações.".
+                format(self.updated_count))
         self.engine.dispose()
 
     def process_item(self, item, spider):
+        realty = Realty.from_item(item)
         session = Session(bind=self.engine)
         try:
-            session.merge(Realty.from_item(item))
+            session.merge(realty)
+            spider.log("**** Inserindo/atualizando: {0}...".format(realty))
             session.commit()
+            self.updated_count += 1
         except:
             session.rollback()
             raise

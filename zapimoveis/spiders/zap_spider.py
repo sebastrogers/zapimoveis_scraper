@@ -60,7 +60,7 @@ class ZapSpider(scrapy.Spider):
                     self.parse_listing,
                     endpoint='execute',
                     args={'lua_source': self.lua_script.
-                                        format(pag=pag, wait=5)},
+                                        format(pag=pag, wait=7)},
                     dont_filter=True
                     )
 

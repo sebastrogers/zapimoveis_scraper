@@ -58,6 +58,11 @@ class SqlAlchemyMiddleware(object):
         finally:
             session.close()
 
+        filtered_count = len(res)
+        spider.log('**** Foram filtradas {0} páginas recentes.'.
+                format(filtered_count))
+        spider.total_details -= filtered_count
+
         for k in requests.keys() - {id for id, in res}:
             yield requests[k]
 
