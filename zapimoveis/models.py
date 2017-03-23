@@ -44,4 +44,4 @@ class Realty(Base):
         return realty
 
     def __repr__(self):
-        return "<Realty(id={0}, name='{1}')>".format(self.id, self.name)
+        return '<Realty(id={0}, name="{1}")>'.format(self.id, self.name)

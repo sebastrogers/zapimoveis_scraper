@@ -1,9 +1,7 @@
 import scrapy
 import json
-import os
 import re
 from scrapy import Request
-from scrapy import Selector
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
 from w3lib.url import urljoin, url_query_cleaner
@@ -11,7 +9,7 @@ from w3lib.url import urljoin, url_query_cleaner
 
 class ZapSpider(scrapy.Spider):
 
-    name = "zap"
+    name = 'zap'
     allowed_domains = ['www.zapimoveis.com.br']
 
     # TODO [romeira]: change listing_pages to start and end pages {23/03/17 04:43}
@@ -79,7 +77,7 @@ class ZapSpider(scrapy.Spider):
         self.total_details += len(links)
 
         self.listing_count += 1
-        self.log("**** Crawled: {0}/{1}\t {2:0.0%} ***".
+        self.log('**** Crawled: {0}/{1}\t {2:0.0%}'.
                 format(self.listing_count, self.total_listings,
                        self.listing_count/self.total_listings))
 
@@ -94,7 +92,7 @@ class ZapSpider(scrapy.Spider):
 
         # A conta aqui pode não ser exata, pois links repetidos são filtrados
         self.details_count += 1
-        self.log("**** Scraped: {0}/{1}\t {2:0.0%} ***".
+        self.log('**** Scraped: {0}/{1}\t {2:0.0%}'.
                 format(self.details_count, self.total_details,
                        self.details_count/self.total_details))
 
@@ -147,3 +145,4 @@ class ZapSpider(scrapy.Spider):
             item['seller_type'] = jsseller.setdefault('@type')
             item['seller_name'] = jsseller.setdefault('name')
             item['seller_url'] = jsseller.setdefault('url')
+

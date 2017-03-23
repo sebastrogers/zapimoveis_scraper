@@ -11,9 +11,12 @@ from w3lib.url import urldefrag
 import json
 import re
 
+
 class ZapimoveisPipeline(object):
     def process_item(self, item, spider):
         item['id'] = re.search('\d+', item['id']).group()
+
+        item['price'] = item['price'].replace(',','.')
 
         if item['useful_area_m2']:
             item['useful_area_m2'] = item['useful_area_m2'].replace('.', '')
@@ -33,15 +36,15 @@ class ZapimoveisPipeline(object):
 class SqlAlchemyPipeline(object):
     def __init__(self, config):
         self.engine = engine_from_config(config, prefix='')
-        self.updated_count = 0
+        self.update_count = 0
 
     @classmethod
     def from_crawler(cls, crawler):
         return cls(crawler.settings.get('SQLALCHEMY_CONFIG'))
 
     def close_spider(self, spider):
-        spider.log("**** Total: {0} updates.".
-                format(self.updated_count))
+        spider.log('**** Total: {0} updates.'.
+                format(self.update_count))
         self.engine.dispose()
 
     def process_item(self, item, spider):
@@ -49,12 +52,13 @@ class SqlAlchemyPipeline(object):
         session = Session(bind=self.engine)
         try:
             session.merge(realty)
-            spider.log("**** Insert/update: {0}...".format(realty))
+            spider.log('**** Insert/update: {0}...'.format(realty))
             session.commit()
-            self.updated_count += 1
+            self.update_count += 1
         except:
             session.rollback()
             raise
         finally:
             session.close()
         return item
+
