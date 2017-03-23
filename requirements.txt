@@ -3,3 +3,4 @@ scrapy-splash==0.7.1
 fake-useragent==0.1.5
 SQLAlchemy==1.1.6
 psycopg2==2.7.1
+w3lib==1.17.0

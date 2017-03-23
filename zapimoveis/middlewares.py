@@ -12,6 +12,7 @@ from zapimoveis.models import Base, Realty
 from datetime import datetime
 from scrapy.http.request import Request
 import re
+from w3lib.url import urlsplit
 
 
 class SqlAlchemyMiddleware(object):
@@ -67,7 +68,7 @@ class SqlAlchemyMiddleware(object):
             yield requests[k]
 
     def extract_url_from_id(self, url):
-        m = re.search('(?i)/id-(\d+)([/?#]|\s*$)', url)
+        m = re.search('(?i)/id-(\d+)', urlsplit(url).path)
         return m.group(1) if m else None
 
     def spider_closed(self, spider):

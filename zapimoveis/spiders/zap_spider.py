@@ -6,6 +6,7 @@ from scrapy import Request
 from scrapy import Selector
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
+from w3lib.url import urljoin, url_query_cleaner, urldefrag
 
 
 class ZapSpider(scrapy.Spider):
@@ -25,19 +26,25 @@ class ZapSpider(scrapy.Spider):
             os.mkdir('files')
 
         self.start_urls = [
-            'https://www.zapimoveis.com.br/venda/imoveis/{0}'.format(
-                    place or 'pe+recife'),
+            self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
+                place or 'pe+recife')),
         ]
 
         self.lua_script = """
             function main(splash)
               assert(splash:go(splash.args.url))
-              assert(splash:runjs("p=$('[name=\\"txtPaginacao\\"]');p.val({pag});p.blur();"))
+              assert(splash:runjs([[
+                      p=$('[name="txtPaginacao"]');
+                      p.val({pag});
+                      p.blur();
+              ]]))
               assert(splash:wait({wait}))
               return splash:html()
             end
         """
 
+    def urlfmt(self, url):
+        return url_query_cleaner(url)
 
     def parse(self, response):
         pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
@@ -56,11 +63,11 @@ class ZapSpider(scrapy.Spider):
         yield from self.parse_listing(response)
 
         for pag in range(2, pages + 1):
-            yield SplashRequest(response.url, 
+            yield SplashRequest(self.urlfmt(response.url), 
                     self.parse_listing,
                     endpoint='execute',
                     args={'lua_source': self.lua_script.
-                                        format(pag=pag, wait=7)},
+                                        format(pag=pag, wait=10)},
                     dont_filter=True
                     )
 
@@ -76,8 +83,7 @@ class ZapSpider(scrapy.Spider):
             f.write(response.body)
 
         for link in links:
-            # O split remove a querystring
-            yield Request(link.split('?',1)[0], self.parse_detail)
+            yield Request(self.urlfmt(link), self.parse_detail)
 
         self.listing_count += 1
         self.log("**** Listings: {0}/{1}\t {2:0.0%} ***".
@@ -151,12 +157,10 @@ class ZapSpider(scrapy.Spider):
             item['seller_type'] = jsseller.setdefault('@type')
             item['seller_name'] = jsseller.setdefault('name')
             if 'url' in jsseller:
-                url, *c_params = jsseller['url'].split('#',1)
+                url, frag = urldefrag(jsseller['url'])
                 item['seller_url'] = url
-                c_params = c_params[0]
-                if c_params:
-                    c_params = json.loads(c_params)
-                    item['client_code'] = c_params.setdefault('codcliente')
-                    item['transaction'] = c_params.setdefault('transacao')
-                    item['property_subtype'] = c_params.setdefault('subtipoimovel')
-
+                if frag:
+                    jsfrag = json.loads(frag)
+                    item['client_code'] = jsfrag.setdefault('codcliente')
+                    item['transaction'] = jsfrag.setdefault('transacao')
+                    item['property_subtype'] = jsfrag.setdefault('subtipoimovel')
