@@ -70,7 +70,7 @@ DOWNLOADER_MIDDLEWARES = {
 # Configure item pipelines
 # See http://scrapy.readthedocs.org/en/latest/topics/item-pipeline.html
 ITEM_PIPELINES = {
-#    'zapimoveis.pipelines.ZapimoveisPipeline': 300,
+   'zapimoveis.pipelines.ZapimoveisPipeline': 300,
    'zapimoveis.pipelines.SqlAlchemyPipeline': 400,
 }
 

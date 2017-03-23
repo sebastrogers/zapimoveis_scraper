@@ -6,7 +6,7 @@ from scrapy import Request
 from scrapy import Selector
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
-from w3lib.url import urljoin, url_query_cleaner, urldefrag
+from w3lib.url import urljoin, url_query_cleaner
 
 
 class ZapSpider(scrapy.Spider):
@@ -71,20 +71,20 @@ class ZapSpider(scrapy.Spider):
                     args={'lua_source': self.lua_script.
                                         format(pag=pag, wait=10)},
                     dont_filter=True
-                    )
+                )
 
 
     def parse_listing(self, response):
         links = response.xpath('//a[@class="detalhes"]/@href').extract()
         self.total_details += len(links)
 
-        for link in links:
-            yield Request(self.urlfmt(link), self.parse_detail)
-
         self.listing_count += 1
         self.log("**** Crawled: {0}/{1}\t {2:0.0%} ***".
                 format(self.listing_count, self.total_listings,
                        self.listing_count/self.total_listings))
+
+        for link in links:
+            yield Request(self.urlfmt(link), self.parse_detail)
 
 
     def parse_detail(self, response):
@@ -92,7 +92,7 @@ class ZapSpider(scrapy.Spider):
         self.parse_json_detail(response, item)
         self.parse_html_detail(response, item)
 
-        # A conta aqui pode não bater, pois links repetidos são filtrados
+        # A conta aqui pode não ser exata, pois links repetidos são filtrados
         self.details_count += 1
         self.log("**** Scraped: {0}/{1}\t {2:0.0%} ***".
                 format(self.details_count, self.total_details,
@@ -106,8 +106,8 @@ class ZapSpider(scrapy.Spider):
 
         item['bedrooms'] = lis.re_first('(?i)<li>\s*(\d+).*quarto')
         item['suites'] = lis.re_first('(?i)<li>\s*(\d+).*su[ií]te') # buscar tradução
-        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+[úu]til').replace('.','')
-        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+total').replace('.','')
+        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+[úu]til')
+        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+total')
         item['vacancies'] = lis.re_first('(?i)<li>\s*(\d+).*vaga')
 
     def parse_json_detail(self, response, item):
@@ -122,13 +122,12 @@ class ZapSpider(scrapy.Spider):
 
         if 'object' in jsitem:
             jsobject = jsitem['object']
-
             item['type'] = jsobject.setdefault('@type')
             item['description'] = jsobject.setdefault('description')
             item['name'] = jsobject.setdefault('name')
             item['url'] = jsobject.setdefault('url')
-            if '@id' in jsobject:
-                item['id'] = re.search('\d+', jsobject['@id']).group()
+            item['id'] = jsobject.setdefault('@id')
+
             if 'address' in jsobject:
                 jsaddress = jsobject['address']
                 if 'addressCountry' in jsaddress:
@@ -138,21 +137,13 @@ class ZapSpider(scrapy.Spider):
                 item['state'] = jsaddress.setdefault('addressRegion')
                 item['postal_code'] = jsaddress.setdefault('postalCode')
                 item['street'] = jsaddress.setdefault('streetAddress')
+
             if 'geo' in jsobject:
                 item['latitude'] = jsobject['geo'].setdefault('latitude')
                 item['longitude'] = jsobject['geo'].setdefault('longitude')
 
-
         if 'seller' in jsitem:
             jsseller = jsitem['seller']
-
             item['seller_type'] = jsseller.setdefault('@type')
             item['seller_name'] = jsseller.setdefault('name')
-            if 'url' in jsseller:
-                url, frag = urldefrag(jsseller['url'])
-                item['seller_url'] = url
-                if frag:
-                    jsfrag = json.loads(frag)
-                    item['client_code'] = jsfrag.setdefault('codcliente')
-                    item['transaction'] = jsfrag.setdefault('transacao')
-                    item['property_subtype'] = jsfrag.setdefault('subtipoimovel')
+            item['seller_url'] = jsseller.setdefault('url')
