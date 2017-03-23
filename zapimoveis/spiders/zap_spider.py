@@ -14,9 +14,13 @@ class ZapSpider(scrapy.Spider):
     name = "zap"
     allowed_domains = ['www.zapimoveis.com.br']
 
+    # TODO [romeira]: change listing_pages to start and end pages {23/03/17 04:43}
+    # TODO [romeira]: argument: expiration time {23/03/17 04:43}
     def __init__(self, place=None, listing_pages=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.listing_pages = None if not listing_pages else int(listing_pages)
+        # TODO [romeira]: change to crawl/scrap {23/03/17 04:46}
+        # TODO [romeira]: use object to encapsulate {23/03/17 04:51}
         self.details_count = 0
         self.listing_count = 0
         self.total_details = 0
@@ -45,7 +49,8 @@ class ZapSpider(scrapy.Spider):
 
     def parse(self, response):
         pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
-        total_pages = int(response.xpath(pattern).extract_first())
+        total_pages = int(response.xpath(pattern).
+                                   extract_first().replace('.', ''))
 
         if self.listing_pages:
             pages = min(self.listing_pages, total_pages)
@@ -77,7 +82,7 @@ class ZapSpider(scrapy.Spider):
             yield Request(self.urlfmt(link), self.parse_detail)
 
         self.listing_count += 1
-        self.log("**** Listings: {0}/{1}\t {2:0.0%} ***".
+        self.log("**** Crawled: {0}/{1}\t {2:0.0%} ***".
                 format(self.listing_count, self.total_listings,
                        self.listing_count/self.total_listings))
 

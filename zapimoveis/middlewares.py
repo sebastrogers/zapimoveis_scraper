@@ -31,7 +31,6 @@ class SqlAlchemyMiddleware(object):
         # Called with the results returned from the Spider, after
         # it has processed the response.
 
-        # TODO [romeira]: add logs {22/03/17 23:36}
         # TODO [romeira]: refactor code {22/03/17 23:35}
         requests = dict()
         for res in result:
@@ -60,7 +59,7 @@ class SqlAlchemyMiddleware(object):
             session.close()
 
         filtered_count = len(res)
-        spider.log('**** Filtered: {0} (recent scraped).'.
+        spider.log('**** Filtered: {0} (recently scraped).'.
                 format(filtered_count))
         spider.total_details -= filtered_count
 
