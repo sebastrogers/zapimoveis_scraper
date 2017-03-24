@@ -5,6 +5,7 @@ from scrapy import Request
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
 from w3lib.url import urljoin, url_query_cleaner
+from datetime import timedelta
 
 
 class ZapSpider(scrapy.Spider):
@@ -12,17 +13,17 @@ class ZapSpider(scrapy.Spider):
     name = 'zap'
     allowed_domains = ['www.zapimoveis.com.br']
 
-    # TODO [romeira]: change listing_pages to start and end pages {23/03/17 04:43}
-    # TODO [romeira]: argument: expiration time {23/03/17 04:43}
-    def __init__(self, place=None, listing_pages=None, *args, **kwargs):
+    def __init__(self, place=None, start=0, 
+                 count=None, expiry=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.listing_pages = None if not listing_pages else int(listing_pages)
-        # TODO [romeira]: change to crawl/scrap {23/03/17 04:46}
-        # TODO [romeira]: use object to encapsulate {23/03/17 04:51}
-        self.details_count = 0
-        self.listing_count = 0
-        self.total_details = 0
-        self.total_listings = 0
+        self.start = int(start) if start else 1
+        self.count = int(count) if count else None
+        self.expiry = self.parse_timedelta(expiry)
+
+        self.crawl_count = 0
+        self.scrape_count = 0
+        self.total_crawled = 0
+        self.total_scraped = 0
 
         self.start_urls = [
             self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
@@ -42,27 +43,28 @@ class ZapSpider(scrapy.Spider):
             end
         """
 
-    def urlfmt(self, url):
-        return url_query_cleaner(url)
 
     def parse(self, response):
         pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
         total_pages = int(response.xpath(pattern).
                                    extract_first().replace('.', ''))
 
-        if self.listing_pages:
-            pages = min(self.listing_pages, total_pages)
+        from_page = self.start
+        if self.count:
+            to_page = min(self.start + self.count - 1, total_pages)
         else:
-            pages = total_pages
+            to_page = total_pages
 
-        self.total_listings += pages
+        pages_count = (to_page - from_page + 1)
+
+        self.total_crawled += pages_count
 
         self.log('Crawling {0} of {1} listing pages...'.
-                format(pages, total_pages))
+                format(pages_count, total_pages))
 
         yield from self.parse_listing(response)
 
-        for pag in range(2, pages + 1):
+        for pag in range(from_page, to_page + 1):
             yield SplashRequest(self.urlfmt(response.url), 
                     self.parse_listing,
                     endpoint='execute',
@@ -74,12 +76,12 @@ class ZapSpider(scrapy.Spider):
 
     def parse_listing(self, response):
         links = response.xpath('//a[@class="detalhes"]/@href').extract()
-        self.total_details += len(links)
+        self.total_scraped += len(links)
 
-        self.listing_count += 1
+        self.crawl_count += 1
         self.log('**** Crawled: {0}/{1}\t {2:0.0%}'.
-                format(self.listing_count, self.total_listings,
-                       self.listing_count/self.total_listings))
+                format(self.crawl_count, self.total_crawled,
+                       self.crawl_count/self.total_crawled))
 
         for link in links:
             yield Request(self.urlfmt(link), self.parse_detail)
@@ -91,10 +93,10 @@ class ZapSpider(scrapy.Spider):
         self.parse_html_detail(response, item)
 
         # A conta aqui pode não ser exata, pois links repetidos são filtrados
-        self.details_count += 1
+        self.scrape_count += 1
         self.log('**** Scraped: {0}/{1}\t {2:0.0%}'.
-                format(self.details_count, self.total_details,
-                       self.details_count/self.total_details))
+                format(self.scrape_count, self.total_scraped,
+                       self.scrape_count/self.total_scraped))
 
         return item
 
@@ -145,4 +147,20 @@ class ZapSpider(scrapy.Spider):
             item['seller_type'] = jsseller.setdefault('@type')
             item['seller_name'] = jsseller.setdefault('name')
             item['seller_url'] = jsseller.setdefault('url')
+
+
+    # TODO [romeira]: put those methods in a new module {23/03/17 23:55}
+    # Formato: 1w1d1h1m
+    def parse_timedelta(self, str_time):
+        if not str_time:
+            return None
+        pattern = ('(?i)' + '((?P<{}>(\d*\.)?\d+){})?' * 4).\
+                format('weeks', 'w', 'days', 'd', 'hours', 'h', 'minutes', 'm')
+        m = re.match(pattern, str_time)
+
+        return timedelta(**{k:float(v) for k,v in m.groupdict().items() if v})\
+               if m.string else None
+        
+    def urlfmt(self, url):
+        return url_query_cleaner(url)
 

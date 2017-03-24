@@ -52,12 +52,14 @@ class SqlAlchemyPipeline(object):
         session = Session(bind=self.engine)
         try:
             session.merge(realty)
-            spider.log('**** Insert/update: {0}...'.format(realty))
             session.commit()
-            self.update_count += 1
         except:
             session.rollback()
             raise
+        else:
+            self.update_count += 1
+            spider.log('**** Insert/update({0}): {1}...'.
+                       format(self.update_count, realty))
         finally:
             session.close()
         return item

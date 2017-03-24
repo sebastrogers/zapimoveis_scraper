@@ -47,10 +47,10 @@ class SqlAlchemyMiddleware(object):
         res = None
         session = Session(bind=self.engine)
         try:
-            # TODO [romeira]: filter by update_time:
-            # .filter(Realty.update_time > today - spider.expiration_time
-            # {22/03/17 23:33}
             q = session.query(Realty.id).filter(Realty.id.in_(requests.keys()))
+            if spider.expiry:
+                q = q.filter(Realty.update_time < (datetime.now() - spider.expiry))
+
             res = q.all()
         except:
             yield from requests.values()
@@ -61,7 +61,7 @@ class SqlAlchemyMiddleware(object):
         filtered_count = len(res)
         spider.log('**** Filtered: {0} (recently scraped).'.
                 format(filtered_count))
-        spider.total_details -= filtered_count
+        spider.total_scraped -= filtered_count
 
         for k in requests.keys() - {id for id, in res}:
             yield requests[k]
