@@ -13,7 +13,7 @@ class ZapSpider(scrapy.Spider):
     name = 'zap'
     allowed_domains = ['www.zapimoveis.com.br']
 
-    def __init__(self, place=None, start=0, 
+    def __init__(self, place=None, start=1, 
                  count=None, expiry=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.start = int(start) if start else 1
@@ -48,7 +48,6 @@ class ZapSpider(scrapy.Spider):
         pattern = '//input[@id="quantidadeTotalPaginas"]/@data-value'
         total_pages = int(response.xpath(pattern).
                                    extract_first().replace('.', ''))
-
         from_page = self.start
         if self.count:
             to_page = min(self.start + self.count - 1, total_pages)
@@ -56,13 +55,14 @@ class ZapSpider(scrapy.Spider):
             to_page = total_pages
 
         pages_count = (to_page - from_page + 1)
-
         self.total_crawled += pages_count
 
         self.log('Crawling {0} of {1} listing pages...'.
                 format(pages_count, total_pages))
 
-        yield from self.parse_listing(response)
+        if from_page == 1:
+            yield from self.parse_listing(response)
+            from_page += 1
 
         for pag in range(from_page, to_page + 1):
             yield SplashRequest(self.urlfmt(response.url), 
