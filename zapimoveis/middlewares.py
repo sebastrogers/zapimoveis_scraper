@@ -49,7 +49,7 @@ class SqlAlchemyMiddleware(object):
         try:
             q = session.query(Realty.id).filter(Realty.id.in_(requests.keys()))
             if spider.expiry:
-                q = q.filter(Realty.update_time < (datetime.now() - spider.expiry))
+                q = q.filter(Realty.update_time > (datetime.now() - spider.expiry))
 
             res = q.all()
         except:

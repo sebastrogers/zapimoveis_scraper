@@ -2,6 +2,7 @@ import scrapy
 import json
 import re
 from scrapy import Request
+from scrapy.linkextractors import LinkExtractor
 from scrapy_splash import SplashRequest
 from zapimoveis.items import ZapItem
 from w3lib.url import urljoin, url_query_cleaner
@@ -25,9 +26,15 @@ class ZapSpider(scrapy.Spider):
         self.total_crawl = 0
         self.total_scrape = 0
 
+        self.link_extractor = LinkExtractor(
+                                    restrict_xpaths='//a[@class="detalhes"]',
+                                    deny='/lancamento/', unique=True,
+                                    process_value=url_query_cleaner,
+                              )
+
         self.start_urls = [
-            self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
-                place or 'pe+recife' if place != 'all' else '')),
+            urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
+                place or 'pe+recife' if place != 'all' else ''),
         ]
 
         self.lua_script = """
@@ -65,7 +72,7 @@ class ZapSpider(scrapy.Spider):
             from_page += 1
 
         for pag in range(from_page, to_page + 1):
-            yield SplashRequest(self.urlfmt(response.url), 
+            yield SplashRequest(response.url, 
                     self.parse_listing,
                     endpoint='execute',
                     args={'lua_source': self.lua_script.
@@ -75,7 +82,8 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse_listing(self, response):
-        links = response.xpath('//a[@class="detalhes"]/@href').extract()
+        links = self.link_extractor.extract_links(response)
+
         self.total_scrape += len(links)
 
         self.crawl_count += 1
@@ -84,10 +92,10 @@ class ZapSpider(scrapy.Spider):
                        self.crawl_count/self.total_crawl))
 
         for link in links:
-            yield Request(self.urlfmt(link), self.parse_detail)
+            yield Request(link.url, self.parse_item)
 
 
-    def parse_detail(self, response):
+    def parse_item(self, response):
         item = ZapItem()
         self.parse_json_detail(response, item)
         self.parse_html_detail(response, item)
@@ -149,7 +157,7 @@ class ZapSpider(scrapy.Spider):
             item['seller_url'] = jsseller.setdefault('url')
 
 
-    # TODO [romeira]: put those methods in a new module {23/03/17 23:55}
+    # TODO [romeira]: put this method in a new module {23/03/17 23:55}
     # Formato: 1w1d1h1m
     def parse_timedelta(self, str_time):
         if not str_time:
@@ -160,7 +168,4 @@ class ZapSpider(scrapy.Spider):
 
         return timedelta(**{k:float(v) for k,v in m.groupdict().items() if v})\
                if m.string else None
-        
-    def urlfmt(self, url):
-        return url_query_cleaner(url)
 
