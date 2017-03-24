@@ -56,7 +56,7 @@ $ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] \
 [comment]: # ( TODO [romeira]: update arguments {24/03/17 01:31} )
 ### Examples
 
-* Default values - Recife-PE, crawl all pages, don't scrape again items in the database:  
+* Default values - Recife-PE, crawl all pages, don't scrape items already in the database:  
   ```
   $ scrapy crawl zap
   ```
