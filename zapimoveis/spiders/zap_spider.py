@@ -15,15 +15,15 @@ class ZapSpider(scrapy.Spider):
 
     def __init__(self, place=None, start=1, 
                  count=None, expiry=None, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+        super(ZapSpider, self).__init__(*args, **kwargs)
         self.start = int(start) if start else 1
         self.count = int(count) if count else None
         self.expiry = self.parse_timedelta(expiry)
 
         self.crawl_count = 0
         self.scrape_count = 0
-        self.total_crawled = 0
-        self.total_scraped = 0
+        self.total_crawl = 0
+        self.total_scrape = 0
 
         self.start_urls = [
             self.urlfmt(urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
@@ -55,7 +55,7 @@ class ZapSpider(scrapy.Spider):
             to_page = total_pages
 
         pages_count = (to_page - from_page + 1)
-        self.total_crawled += pages_count
+        self.total_crawl += pages_count
 
         self.log('Crawling {0} of {1} listing pages...'.
                 format(pages_count, total_pages))
@@ -76,12 +76,12 @@ class ZapSpider(scrapy.Spider):
 
     def parse_listing(self, response):
         links = response.xpath('//a[@class="detalhes"]/@href').extract()
-        self.total_scraped += len(links)
+        self.total_scrape += len(links)
 
         self.crawl_count += 1
         self.log('**** Crawled: {0}/{1}\t {2:0.0%}'.
-                format(self.crawl_count, self.total_crawled,
-                       self.crawl_count/self.total_crawled))
+                format(self.crawl_count, self.total_crawl,
+                       self.crawl_count/self.total_crawl))
 
         for link in links:
             yield Request(self.urlfmt(link), self.parse_detail)
@@ -95,8 +95,8 @@ class ZapSpider(scrapy.Spider):
         # A conta aqui pode não ser exata, pois links repetidos são filtrados
         self.scrape_count += 1
         self.log('**** Scraped: {0}/{1}\t {2:0.0%}'.
-                format(self.scrape_count, self.total_scraped,
-                       self.scrape_count/self.total_scraped))
+                format(self.scrape_count, self.total_scrape,
+                       self.scrape_count/self.total_scrape))
 
         return item
 

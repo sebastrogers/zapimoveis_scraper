@@ -39,33 +39,39 @@ $ docker run -p 8050:8050 scrapinghub/splash
 
 Then run the crawler:
 ```
-$ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] [-a listing_pages=n]
+$ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] \
+                   [-a start=n] [-a count=n] [-a expiry=[nw][nd][nh][nm]]
 ```
 
-Notes:
+**Arguments**:
 
-* You can pass a number through `listing_pages` as an argument to limit the number of listing pages the scraper will search for. The default is to scrap all.
+* **count**: limits the number of listing pages the crawler will search for. The default is to crawl till the end.
 
-* You can also pass a place you want to search through the `place` argument, following the Zapimoveis URL format. Default: `pe+recife`.
+* **start**: start crawling from a given page. The default is `1`.
 
+* **expiry**: every time an item is inserted or updated, it's given an `updated_time` attribute. You can determine for how long the items remains valid by passing a timespan (e.g. `1h`). By default the items in database are all considered valid.
+
+* **place**: a place you want to search, following the Zapimoveis URL format. Default: `pe+recife`.
+
+[comment]: # ( TODO [romeira]: update arguments {24/03/17 01:31} )
 ### Examples
 
-* Default values (Recife-PE, all linsting pages):  
+* Default values - Recife-PE, crawl all pages, don't scrape again items in the database:  
   ```
   $ scrapy crawl zap
   ```
 
-* Olinda-PE, 4 linsting pages:  
+* Olinda-PE, crawl 4 pages, scrape again items older than 1 day and 12 hours:  
   ```
-  $ scrapy crawl zap -a listing_pages=4 -a place=pe+olinda
-  ```
-
-* Rio de Janeiro-RJ - south zone, all linsting pages:  
-  ```
-  $ scrapy crawl zap -a place=rj+rio-de-janeiro+zona-sul
+  $ scrapy crawl zap -a count=4 -a place=pe+olinda -a expiry=1d12h
   ```
 
-* All places, 3 linsting pages:  
+* Rio de Janeiro-RJ - south zone, crawl to the end, starting at page 100:
   ```
-  $ scrapy crawl zap -a listing_pages=3 -a place=all
+  $ scrapy crawl zap -a start=100 -a place=rj+rio-de-janeiro+zona-sul
+  ```
+
+* All places, starting from page 4, crawl 3 pages:
+  ```
+  $ scrapy crawl zap -a start=4 -a count=3 -a place=all
   ```

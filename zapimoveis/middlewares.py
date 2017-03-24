@@ -34,7 +34,7 @@ class SqlAlchemyMiddleware(object):
         # TODO [romeira]: refactor code {22/03/17 23:35}
         requests = dict()
         for res in result:
-            if type(res) == Request:
+            if isinstance(res, Request):
                 res_id = self.extract_url_from_id(res.url)
                 if res_id:
                     requests[int(res_id)] = res
@@ -61,7 +61,7 @@ class SqlAlchemyMiddleware(object):
         filtered_count = len(res)
         spider.log('**** Filtered: {0} (recently scraped).'.
                 format(filtered_count))
-        spider.total_scraped -= filtered_count
+        spider.total_scrape -= filtered_count
 
         for k in requests.keys() - {id for id, in res}:
             yield requests[k]
