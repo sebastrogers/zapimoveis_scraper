@@ -6,7 +6,7 @@ You will need to have docker installed in your machine in order to pull and run 
 
 |Major requirements|
 |-|
-|[Python 3.5+](https://www.python.org/)|
+|[Python 3.6](https://www.python.org/)|
 |[Docker](https://www.docker.com/) |
 |[PostgreSQL](https://www.postgresql.org/) |
 
