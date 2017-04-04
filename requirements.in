@@ -1,0 +1,6 @@
+Scrapy
+scrapy-splash
+fake-useragent
+SQLAlchemy
+psycopg2
+w3lib
