@@ -2,7 +2,7 @@
 A scraper that gathers data from [Zap Imóveis](http://zapimoveis.com.br) website.
 
 ## Installation
-You need to have docker installed in your machine in order to pull and run [Splash](http://splash.readthedocs.io/).  
+You need docker installed in your machine in order to pull and run [Splash](http://splash.readthedocs.io/).  
 
 |Major requirements|
 |-|
