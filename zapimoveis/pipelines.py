@@ -22,6 +22,10 @@ class ZapimoveisPipeline(object):
             item['useful_area_m2'] = item['useful_area_m2'].replace('.', '')
         if item['total_area_m2']:
             item['total_area_m2'] = item['total_area_m2'].replace('.', '')
+        if item['condominium_fee']:
+            item['condominium_fee'] = item['condominium_fee'].replace('.','')
+        if item['iptu']:
+            item['iptu'] = item['iptu'].replace('.','')
 
         item['seller_url'], frag = urldefrag(item['seller_url'])
         if frag:

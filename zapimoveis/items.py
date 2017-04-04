@@ -38,6 +38,8 @@ class ZapItem(Item):
     useful_area_m2 = Field()
     total_area_m2 = Field()
     vacancies = Field()
+    condominium_fee = Field()
+    iptu = Field()
 
     def __repr__(self):
         return '<ZapItem(id={0}, name="{1}")>'.format(self['id'], self['name'])

@@ -112,11 +112,14 @@ class ZapSpider(scrapy.Spider):
     def parse_html_detail(self, response, item):
         lis = response.css('div.informacoes-imovel ul > li')
 
-        item['bedrooms'] = lis.re_first('(?i)<li>\s*(\d+).*quarto')
-        item['suites'] = lis.re_first('(?i)<li>\s*(\d+).*su[ií]te') # buscar tradução
-        item['useful_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+[úu]til')
-        item['total_area_m2'] = lis.re_first('(?i)<li>\s*(\d+(\.\d+)?).*[aá]rea\s+total')
-        item['vacancies'] = lis.re_first('(?i)<li>\s*(\d+).*vaga')
+        item['bedrooms'] = lis.re_first('(?i)<li>.*?(\d+).*?quarto')
+        item['suites'] = lis.re_first('(?i)<li>.*?(\d+).*?su[ií]te') # buscar tradução
+        item['vacancies'] = lis.re_first('(?i)<li>.*?(\d+).*?vaga')
+        item['useful_area_m2'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?[aá]rea\s+[úu]til')
+        item['total_area_m2'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?[aá]rea\s+total')
+        item['condominium_fee'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?condom[ií]nio')
+        item['iptu'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?iptu')
+
 
     def parse_json_detail(self, response, item):
         pattern = '/html/body/script[@type="application/ld+json"]/text()'
