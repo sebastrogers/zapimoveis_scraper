@@ -34,7 +34,7 @@ class Realty(Base):
     suites = Column(Integer) # buscar tradução
     useful_area_m2 = Column(Integer)
     total_area_m2 = Column(Integer)
-    vacancies = Column(String)
+    vacancies = Column(Integer)
     condominium_fee = Column(Float)
     iptu = Column(Float)
     update_time = Column(DateTime)
