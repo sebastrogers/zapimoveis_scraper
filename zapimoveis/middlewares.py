@@ -35,7 +35,7 @@ class SqlAlchemyMiddleware(object):
         requests = dict()
         for res in result:
             if isinstance(res, Request):
-                res_id = self.extract_url_from_id(res.url)
+                res_id = self.extract_id_from_url(res.url)
                 if res_id:
                     requests[int(res_id)] = res
                     continue
@@ -66,7 +66,7 @@ class SqlAlchemyMiddleware(object):
         for k in requests.keys() - {id for id, in res}:
             yield requests[k]
 
-    def extract_url_from_id(self, url):
+    def extract_id_from_url(self, url):
         m = re.search('(?i)/id-(\d+)', urlsplit(url).path)
         return m.group(1) if m else None
 
