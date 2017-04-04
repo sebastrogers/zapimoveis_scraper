@@ -2,7 +2,7 @@
 A scraper that gathers data from [Zap Imóveis](http://zapimoveis.com.br) website.
 
 ## Installation
-You will need to have docker installed in your machine in order to pull and run [Splash](http://splash.readthedocs.io/).  
+You need to have docker installed in your machine in order to pull and run [Splash](http://splash.readthedocs.io/).  
 
 |Major requirements|
 |-|
@@ -49,11 +49,10 @@ $ scrapy crawl zap [-a place=<(e.g. pe+olinda)>] \
 
 * **start**: start crawling from a given page. The default is `1`.
 
-* **expiry**: every time an item is inserted or updated, it's given an `updated_time` attribute. You can determine for how long the items remains valid by passing a timespan (e.g. `1h`). By default the items in database are all considered valid.
+* **expiry**: every time an item is inserted or updated, it's given an `updated_time` attribute. You can determine for how long the items remains valid by passing a timespan (e.g. `1h`). By default all items in the database are considered valid.
 
 * **place**: a place you want to search, following the Zapimoveis URL format. Default: `pe+recife`.
 
-[comment]: # ( TODO [romeira]: update arguments {24/03/17 01:31} )
 ### Examples
 
 * Default values - Recife-PE, crawl all pages, don't scrape items already in the database:  
