@@ -110,15 +110,17 @@ class ZapSpider(scrapy.Spider):
 
 
     def parse_html_detail(self, response, item):
-        lis = response.css('div.informacoes-imovel ul > li')
+        pattern = '//div[contains(@class, "informacoes-imovel")]//li'
+        lis = response.xpath(pattern)
+        find_num = lambda s: lis.re_first('(?i)((?:\d+[,.])*\d+).*?' + s)
 
-        item['bedrooms'] = lis.re_first('(?i)<li>.*?(\d+).*?quarto')
-        item['suites'] = lis.re_first('(?i)<li>.*?(\d+).*?su[ií]te') # buscar tradução
-        item['vacancies'] = lis.re_first('(?i)<li>.*?(\d+).*?vaga')
-        item['useful_area_m2'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?[aá]rea\s+[úu]til')
-        item['total_area_m2'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?[aá]rea\s+total')
-        item['condominium_fee'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?condom[ií]nio')
-        item['iptu'] = lis.re_first('(?i)<li>.*?((\d+\.)*\d+).*?iptu')
+        item['bedrooms'] = find_num('quarto')
+        item['suites'] = find_num('su[ií]te') # buscar tradução
+        item['vacancies'] = find_num('vaga')
+        item['useful_area_m2'] = find_num('[aá]rea\s+[úu]til')
+        item['total_area_m2'] = find_num('[aá]rea\s+total')
+        item['condominium_fee'] = find_num('condom[ií]nio')
+        item['iptu'] = find_num('iptu')
 
 
     def parse_json_detail(self, response, item):
