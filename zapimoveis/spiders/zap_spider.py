@@ -97,8 +97,8 @@ class ZapSpider(scrapy.Spider):
 
     def parse_item(self, response):
         item = ZapItem()
-        self.parse_json_detail(response, item)
-        self.parse_html_detail(response, item)
+        self.parse_item_json(response, item)
+        self.parse_item_html(response, item)
 
         # A conta aqui pode não ser exata, pois links repetidos são filtrados
         self.scrape_count += 1
@@ -109,9 +109,8 @@ class ZapSpider(scrapy.Spider):
         return item
 
 
-    def parse_html_detail(self, response, item):
-        pattern = '//div[contains(@class, "informacoes-imovel")]//li'
-        lis = response.xpath(pattern)
+    def parse_item_html(self, response, item):
+        lis = response.css('div.informacoes-imovel ul > li')
         find_num = lambda s: lis.re_first('(?i)((?:\d+[,.])*\d+).*?' + s)
 
         item['bedrooms'] = find_num('quarto')
@@ -123,7 +122,7 @@ class ZapSpider(scrapy.Spider):
         item['iptu'] = find_num('iptu')
 
 
-    def parse_json_detail(self, response, item):
+    def parse_item_json(self, response, item):
         pattern = '/html/body/script[@type="application/ld+json"]/text()'
         jsitem = json.loads(response.xpath(pattern).extract_first())[1]
 
