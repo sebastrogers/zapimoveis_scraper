@@ -18,6 +18,7 @@ class Realty(Base):
     state = Column(String)
     postal_code = Column(String)
     street = Column(String)
+    district = Column(String)
     description = Column(String)
     latitude = Column(Float)
     longitude = Column(Float)

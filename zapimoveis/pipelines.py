@@ -13,10 +13,20 @@ import re
 
 
 class ZapimoveisPipeline(object):
+    # TODO [romeira]: create item loader {08/04/17 22:27}
     def process_item(self, item, spider):
         item['id'] = re.search('\d+', item['id']).group()
 
         item['price'] = item['price'].replace(',','.')
+
+        if item['street']:
+            address = item['street']
+            item['street'] = None
+            *fields, _ = address.rsplit(',', maxsplit=2)
+            if fields:
+                item['district'] = fields[-1].strip()
+                if len(fields) > 1:
+                    item['street'] = fields[-2].strip()
 
         if item['useful_area_m2']:
             item['useful_area_m2'] = item['useful_area_m2'].replace('.', '')

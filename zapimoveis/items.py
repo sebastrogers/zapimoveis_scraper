@@ -19,6 +19,7 @@ class ZapItem(Item):
     state = Field()
     postal_code = Field()
     street = Field()
+    district = Field()
     description = Field()
     latitude = Field()
     longitude = Field()
