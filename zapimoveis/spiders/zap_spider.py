@@ -27,10 +27,9 @@ class ZapSpider(scrapy.Spider):
         self.total_scrape = 0
 
         self.link_extractor = LinkExtractor(
-                                    restrict_xpaths='//a[@class="detalhes"]',
-                                    deny='/lancamento/', unique=True,
-                                    process_value=url_query_cleaner,
-                              )
+                restrict_xpaths='//div[@id="list"]//a[contains(@class, "detalhes")]',
+                deny='/lancamento/', unique=True,
+                process_value=url_query_cleaner)
 
         self.start_urls = [
             urljoin('https://www.zapimoveis.com.br/venda/imoveis/',
@@ -41,7 +40,7 @@ class ZapSpider(scrapy.Spider):
             function main(splash)
               assert(splash:go(splash.args.url))
               assert(splash:runjs([[
-                      p=$('[name="txtPaginacao"]');
+                      p=$('input[name="txtPaginacao"]');
                       p.val({pag});
                       p.blur();
               ]]))
