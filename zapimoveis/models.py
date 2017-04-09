@@ -10,7 +10,7 @@ class Realty(Base):
 
     # TODO [romeira]: apply type constraints {23/03/17 05:58}
     id = Column(Integer, primary_key=True)
-    name = Column(String)
+    title = Column(String)
     action = Column(String)
     type = Column(String)
     country = Column(String)
@@ -47,4 +47,4 @@ class Realty(Base):
         return realty
 
     def __repr__(self):
-        return '<Realty(id={0}, name="{1}")>'.format(self.id, self.name)
+        return '<Realty(id={0}, title="{1}")>'.format(self.id, self.title)

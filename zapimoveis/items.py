@@ -11,7 +11,7 @@ from scrapy import Item, Field
 class ZapItem(Item):
     # Extraídos do Json
     id = Field()
-    name = Field()
+    title = Field()
     action = Field()
     type = Field()
     country = Field()
@@ -43,4 +43,4 @@ class ZapItem(Item):
     iptu = Field()
 
     def __repr__(self):
-        return '<ZapItem(id={0}, name="{1}")>'.format(self['id'], self['name'])
+        return '<ZapItem(id={0}, title="{1}")>'.format(self['id'], self['title'])

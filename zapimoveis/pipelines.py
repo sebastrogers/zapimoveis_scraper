@@ -19,6 +19,10 @@ class ZapimoveisPipeline(object):
 
         item['price'] = item['price'].replace(',','.')
 
+        if item['title']:
+            item['title'] = item['title'].rsplit(',', maxsplit=1)[0].strip()
+
+
         if item['street']:
             address = item['street']
             item['street'] = None

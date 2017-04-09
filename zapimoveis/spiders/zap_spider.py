@@ -135,7 +135,7 @@ class ZapSpider(scrapy.Spider):
             jsobject = jsitem['object']
             item['type'] = jsobject.setdefault('@type')
             item['description'] = jsobject.setdefault('description')
-            item['name'] = jsobject.setdefault('name')
+            item['title'] = jsobject.setdefault('name')
             item['url'] = jsobject.setdefault('url')
             item['id'] = jsobject.setdefault('@id')
 
