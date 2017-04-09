@@ -123,7 +123,7 @@ class ZapSpider(scrapy.Spider):
 
     def parse_item_json(self, response, item):
         pattern = '/html/body/script[@type="application/ld+json"]/text()'
-        jsitem = json.loads(response.xpath(pattern).extract_first())[1]
+        jsitem = json.loads(response.xpath(pattern).extract_first())[2]
 
         item['action'] = jsitem.setdefault('@type')
         item['price'] = jsitem.setdefault('price')
